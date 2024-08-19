@@ -1,7 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import {Keyboard, Text, TextInput, View} from 'react-native';
 import RNOtpVerify from 'react-native-otp-verify';
-import Clipboard from '@react-native-clipboard/clipboard';
 
 const App = () => {
   const [otp, setOtp] = useState('');
@@ -21,6 +20,7 @@ const App = () => {
       })
       .catch(err => console.log('Error starting OTP listener:', err));
 
+    // Cleanup: Dinleyiciyi bileşen unmount olduğunda kaldır
     return () => {
       if (listenerActive) {
         RNOtpVerify.removeListener();
@@ -30,17 +30,15 @@ const App = () => {
   }, [listenerActive]);
 
   const otpHandler = message => {
-    console.log('Received message:', message);
+    console.log('Received message:', message); // SMS içeriğini al
 
-    // Mesajdan OTP'yi kaldırma kısmı
+    // Mesajdan OTP'yi ayıkla
     const match = /(\d{6})/g.exec(message);
     if (match) {
       const lOtp = match[0];
       setOtp(lOtp);
 
-      // OTP kodunu otomatik olarak kopyala
-      Clipboard.setString(lOtp);
-
+      // Dinleyiciyi kaldır ve klavyeyi gizle
       if (listenerActive) {
         RNOtpVerify.removeListener();
         setListenerActive(false);
@@ -67,6 +65,7 @@ const App = () => {
           marginTop: 20,
         }}
         placeholder="Enter OTP"
+        value={otp}
         onChangeText={setOtp}
       />
     </View>
